@@ -3,6 +3,11 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Globe, LeafIcon, Tally2, X } from "lucide-react";
+interface MenuItemsInteface {
+  name: string;
+  submenu?: boolean;
+  subItems?: { name: string; href: string }[];
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,8 +60,18 @@ export default function Navbar() {
       },
     },
   };
-  const menuItems = [
-    { name: "What We Offer", submenu: true },
+  const menuItems: MenuItemsInteface[] = [
+    {
+      name: "What We Offer",
+      submenu: true,
+      subItems: [
+        { name: "Invest", href: "#" },
+        { name: "Crypto", href: "#" },
+        { name: "Retirement", href: "#" },
+        { name: "Options", href: "#" },
+        { name: "Futures", href: "#" },
+      ],
+    },
     { name: "Credit Card" },
     { name: "Gold" },
     { name: "Robinhood Legend" },
@@ -80,14 +95,14 @@ export default function Navbar() {
 
   return (
     <nav className="bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b-2 border-b-gray-300">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 border-b-2 border-b-gray-300">
         <div className="flex items-center justify-between h-16 ">
           <div className="flex items-center ">
             <div className="flex flex-row gap-2">
               <LeafIcon className="h-8 w-8" />
               <span className="text-xl font-medium">Robinhood</span>
             </div>
-            <div className="hidden md:block">
+            {/* <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
                 {menuItems.map((item) => (
                   <a
@@ -98,6 +113,13 @@ export default function Navbar() {
                     {item.name}
                     {item.submenu && <ChevronDown className="ml-1 h-4 w-4" />}
                   </a>
+                ))}
+              </div>
+            </div> */}
+            <div className="hidden md:block">
+              <div className="ml-10 flex items-baseline space-x-4">
+                {menuItems.map((item: MenuItemsInteface) => (
+                  <NavMenuItem key={item.name} item={item} />
                 ))}
               </div>
             </div>
@@ -185,3 +207,93 @@ export default function Navbar() {
     </nav>
   );
 }
+
+interface NavMenuItemProps {
+  item: MenuItemsInteface;
+}
+
+const NavMenuItem = ({ item }: NavMenuItemProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const dropdownVariants = {
+    hidden: {
+      opacity: 0,
+      y: -5,
+      transition: {
+        duration: 0.2,
+        ease: "easeInOut",
+      },
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const chevronVariants = {
+    open: {
+      rotate: 180,
+      transition: { duration: 0.2 },
+    },
+    closed: {
+      rotate: 0,
+      transition: { duration: 0.2 },
+    },
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+      onClick={() => {
+        setIsOpen(!isOpen);
+      }}
+    >
+      <a
+        href="#"
+        className="text-gray-300 hover:text-[#ccff00] px-3 py-2 text-sm font-medium flex items-center"
+      >
+        {item.name}
+        {item.submenu && (
+          <motion.div
+            variants={chevronVariants}
+            animate={isOpen ? "open" : "closed"}
+            className="ml-1"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </motion.div>
+        )}
+      </a>
+
+      {item.submenu && (
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={dropdownVariants}
+              className="absolute left-0 mt-0 w-48 bg-black rounded-md shadow-lg py-2"
+            >
+              {item.subItems &&
+                item.subItems.map((subItem) => (
+                  <a
+                    key={subItem.name}
+                    href={subItem.href}
+                    className="block px-4 py-2 text-sm text-gray-300 hover:text-[#ccff00] hover:bg-gray-900"
+                  >
+                    {subItem.name}
+                  </a>
+                ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
+    </div>
+  );
+};
